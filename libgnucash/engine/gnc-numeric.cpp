@@ -40,6 +40,7 @@ extern "C"
 #include <boost/locale/encoding_utf.hpp>
 #include <sstream>
 #include <cstdlib>
+#include <locale>
 
 #include "gnc-numeric.hpp"
 #include "gnc-rational.hpp"
@@ -115,26 +116,99 @@ GncNumeric::GncNumeric(double d) : m_num(0), m_den(1)
     m_den = r.denom();
 }
 
+static GncInt128&& parse_int_str (const std::string& str, bool is_hex)
+{
+    unsigned long long num = 0;
+    std::istringstream numss(str);
+    if (is_hex)
+        numss.setf ( std::ios::hex, std::ios::basefield );
+    numss >> num;
+    if (!numss.eof())
+        throw std::invalid_argument("Can't parse \""+ str + "\" into an integral number.");
+
+    return std::move(GncInt128(num));
+}
+
+
 using boost::regex;
 using boost::smatch;
 using boost::regex_search;
-GncNumeric::GncNumeric(const std::string& str, bool autoround)
+static GncRational&& parse_num_str (const std::string& str, const std::string& dp, bool autoround)
 {
-    static const std::string numer_frag("(-?[0-9]+)");
-    static const std::string denom_frag("([0-9]+)");
-    static const std::string hex_frag("(0x[a-f0-9]+)");
-    static const std::string slash( "[ \\t]*/[ \\t]*");
-    /* The llvm standard C++ library refused to recognize the - in the
-     * numer_frag patter with the default ECMAScript syntax so we use the awk
-     * syntax.
-     */
-    static const regex numeral(numer_frag);
-    static const regex hex(hex_frag);
-    static const regex numeral_rational(numer_frag + slash + denom_frag);
-    static const regex hex_rational(hex_frag + slash + hex_frag);
-    static const regex hex_over_num(hex_frag + slash + denom_frag);
-    static const regex num_over_hex(numer_frag + slash + hex_frag);
-    static const regex decimal(numer_frag + "[.,]" + denom_frag);
+    /* Regex test will ensure there's exactly 0 or 1 decimal points in the string
+     * It recognizes numbers in these formats
+     * (each time with or without thousands separators):
+     * xxxxx (no decimal point)
+     * .xxxxx (no whole part)
+     * xxxx.xxxx (whole and decimal part)
+    */
+    auto re_str("^([^" + dp + "]+)?(?:([" + dp + "])([^" + dp + "]+))?$");
+    static const regex dec_splits(re_str);
+    smatch m;
+    if (!regex_search(str, m, dec_splits))
+        throw std::invalid_argument("Can't construct a GncNumeric from string with multiple decimal points.");
+
+    GncInt128 high(0);
+    GncInt128 low(0);
+    int64_t d = 1;
+    if (m[1].str() == dp) // detected format is .xxxxx
+    {
+        low = parse_int_str(m[2].str(),
+                            (m[2].str().find("0x") != std::string::npos));
+        d = powten(m[2].str().length());
+    }
+    else if (!m[1].str().empty())
+    {
+        // We have an integral part
+        high = parse_int_str(m[1].str(),
+                             (m[1].str().find("0x") != std::string::npos));
+        if (!m[3].str().empty())
+        {
+            // And a decimal part
+            low = parse_int_str(m[3].str(),
+                                (m[3].str().find("0x") != std::string::npos));
+            d = powten(m[3].str().length());
+        }
+    }
+    else
+    {
+        std::ostringstream errmsg;
+        errmsg << "Can't extract integral and/or decimal parts from \"" << str
+        << "\" to construct GncNumeric with.";
+        throw std::invalid_argument(errmsg.str());
+    }
+
+    GncInt128 n = high * d + (high >= 0 ? low : -low);
+    if (!autoround && n.isBig())
+    {
+        std::ostringstream errmsg;
+        errmsg << "Decimal string \"" << str
+        << "\" can't be represented in a GncNumeric without rounding.";
+        throw std::overflow_error(errmsg.str());
+    }
+    while (n.isBig() && d > 0)
+    {
+        n >>= 1;
+        d >>= 1;
+    }
+    if (n.isBig()) //Shouldn't happen, of course
+    {
+        std::ostringstream errmsg;
+        errmsg << "Decimal string \"" << str
+        << "\" can't be represented in a GncNumeric, even after reducing denom to " << d;
+        throw std::overflow_error(errmsg.str());
+    }
+    return std::move(GncRational(n, d));
+}
+
+GncNumeric::GncNumeric(const std::string& str, const std::locale& loc, bool autoround)
+{
+    const std::numpunct<char>& np = std::use_facet<std::numpunct<char>>(loc);
+    const std::string ts({ np.thousands_sep()});
+    const std::string dp({ np.decimal_point()});
+    const std::string num_frag("(?:0x)?[a-f0-9" + dp + ts + "]+");
+    const std::string slash( "[ \\t]*/[ \\t]*");
+    const regex all_supported("^(-?" + num_frag + ")(?:" + slash + "(" + num_frag + "))?");
     smatch m;
 /* The order of testing the regexes is from the more restrictve to the less
  * restrictive, as less-restrictive ones will match patterns that would also
@@ -142,84 +216,41 @@ GncNumeric::GncNumeric(const std::string& str, bool autoround)
  */
     if (str.empty())
         throw std::invalid_argument("Can't construct a GncNumeric from an empty string.");
-    if (regex_search(str, m, hex_rational))
+    if (regex_search(str, m, all_supported))
     {
-        GncNumeric n(stoll(m[1].str(), nullptr, 16),
-                     stoll(m[2].str(), nullptr, 16));
-        m_num = n.num();
-        m_den = n.denom();
-        return;
-    }
-    if (regex_search(str, m, hex_over_num))
-    {
-        GncNumeric n(stoll(m[1].str(), nullptr, 16),
-                     stoll(m[2].str()));
-        m_num = n.num();
-        m_den = n.denom();
-        return;
-    }
-    if (regex_search(str, m, num_over_hex))
-    {
-        GncNumeric n(stoll(m[1].str()),
-                     stoll(m[2].str(), nullptr, 16));
-        m_num = n.num();
-        m_den = n.denom();
-        return;
-    }
-    if (regex_search(str, m, numeral_rational))
-    {
-        GncNumeric n(stoll(m[1].str()), stoll(m[2].str()));
-        m_num = n.num();
-        m_den = n.denom();
-        return;
-    }
-    if (regex_search(str, m, decimal))
-    {
-        GncInt128 high(stoll(m[1].str()));
-        GncInt128 low(stoll(m[2].str()));
-        int64_t d = powten(m[2].str().length());
-        GncInt128 n = high * d + (high >= 0 ? low : -low);
-        if (!autoround && n.isBig())
+        auto num = parse_num_str (m[1].str(), dp, autoround);
+        if (!m[2].str().empty())
+        {
+            auto denom = GncRational();
+            denom = parse_num_str (m[2].str(), dp, autoround);
+            num /= denom;
+        }
+
+        // Try to fit the GncRational into a GncNumeric
+        // while honoring the autoround restriction
+        if (num.is_big())
+            num.reduce();
+        if (!autoround && num.is_big())
         {
             std::ostringstream errmsg;
-            errmsg << "Decimal string " << m[1].str() << "." << m[2].str()
-                   << "can't be represented in a GncNumeric without rounding.";
-            throw std::overflow_error(errmsg.str());
+            errmsg << "Decimal string \"" << str
+            << "\" can't be represented in a GncNumeric without rounding.";
         }
-        while (n.isBig() && d > 0)
-        {
-            n >>= 1;
-            d >>= 1;
-        }
-        if (n.isBig()) //Shouldn't happen, of course
-        {
-            std::ostringstream errmsg;
-            errmsg << "Decimal string " << m[1].str() << "." << m[2].str()
-            << " can't be represented in a GncNumeric, even after reducing denom to " << d;
-            throw std::overflow_error(errmsg.str());
-        }
-        GncNumeric gncn(static_cast<int64_t>(n), d);
+
+        GncNumeric gncn(num);
         m_num = gncn.num();
         m_den = gncn.denom();
         return;
     }
-    if (regex_search(str, m, hex))
-    {
-        GncNumeric n(stoll(m[1].str(), nullptr, 16),INT64_C(1));
-        m_num = n.num();
-        m_den = n.denom();
-        return;
-    }
-    if (regex_search(str, m, numeral))
-    {
-        GncNumeric n(stoll(m[1].str()), INT64_C(1));
-        m_num = n.num();
-        m_den = n.denom();
-        return;
-    }
+
     std::ostringstream errmsg;
     errmsg << "String " << str << " contains no recognizable numeric value.";
     throw std::invalid_argument(errmsg.str());
+}
+
+GncNumeric::GncNumeric(const std::string& str, bool autoround)
+{
+    *this = GncNumeric(str, std::locale(), autoround);
 }
 
 GncNumeric::operator gnc_numeric() const noexcept
@@ -657,8 +688,6 @@ gnc_numeric_positive_p(gnc_numeric a)
 int
 gnc_numeric_compare(gnc_numeric a, gnc_numeric b)
 {
-    gint64 aa, bb;
-
     if (gnc_numeric_check(a) || gnc_numeric_check(b))
     {
         return 0;
@@ -804,7 +833,6 @@ gnc_numeric
 gnc_numeric_sub(gnc_numeric a, gnc_numeric b,
                 gint64 denom, gint how)
 {
-    gnc_numeric nb;
     if (gnc_numeric_check(a) || gnc_numeric_check(b))
     {
         return gnc_numeric_error(GNC_ERROR_ARG);

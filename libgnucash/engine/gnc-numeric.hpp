@@ -117,15 +117,22 @@ public:
     GncNumeric(double d);
 
     /**
-     * String constructor.
+     * String constructors.
      *
-     * Accepts integer values in decimal and hexadecimal. Does not accept
-     * thousands separators. If the string contains a '/' it is taken to
-     * separate the numerator and denominator; if it conains either a '.' or a
-     * ',' it is taken as a decimal point and the integers on either side will
+     * Accepts integer values in decimal and hexadecimal.
+     *
+     * Accepts numbers with optional thousands separators. The thousands
+     * separtor is taken from the locale passed in or from the default locale
+     * if none is passed.
+     *
+     * If the string contains a '/' it is taken to separate the numerator
+     * and denominator.
+     *
+     * If it contains a decimal separator the integers on either side will
      * be combined and a denominator will be the appropriate power of 10. If
-     * neither is present the number will be treated as an integer and m_den
-     * will be set to 1.
+     * none is present the number will be treated as an integer and m_den
+     * will be set to 1.  The decimal separator is taken from the locale passed
+     * in or from the default locale if none is passed.
      *
      * Whitespace around a '/' is ignored. A correctly-formatted number will be
      * extracted from a larger string.
@@ -135,8 +142,12 @@ public:
      * denominator will cause the constructor to throw std::underflow_error. An
      * empty string or one which contains no recognizable number will result in
      * std::invalid_argument.
+     *
+     * @{
      */
     GncNumeric(const std::string& str, bool autoround=false);
+    GncNumeric(const std::string& str, const std::locale& loc, bool autoround=false);
+    /* @} */
     GncNumeric(const GncNumeric& rhs) = default;
     GncNumeric(GncNumeric&& rhs) = default;
     GncNumeric& operator=(const GncNumeric& rhs) = default;
