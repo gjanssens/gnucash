@@ -75,6 +75,9 @@ void    xaccLogEnable (void);
 /** document me */
 void    xaccLogDisable (void);
 
+/** document me */
+gboolean xaccLogIsEnabled (void);
+
 /** The xaccLogSetBaseName() method sets the base filepath and the
  *    root part of the journal file name.  If the journal file is
  *    already open, it will close it and reopen it with the new
