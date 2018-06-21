@@ -269,6 +269,9 @@ KvpValue* qof_book_get_option (QofBook *book, GSList *key_path);
 const char* qof_book_get_string_option(const QofBook* book, const char* opt_name);
 void qof_book_set_string_option(QofBook* book, const char* opt_name, const char* opt_val);
 
+// Recurrence stuff
+%include <Recurrence.h>
+
 #if defined(SWIGGUILE)
 %init {
   {
@@ -411,6 +414,22 @@ void qof_book_set_string_option(QofBook* book, const char* opt_name, const char*
     SET_ENUM("QOF-DATE-FORMAT-UTC");
     SET_ENUM("QOF-DATE-FORMAT-CUSTOM");
 
+    SET_ENUM("PERIOD-INVALID");
+    SET_ENUM("PERIOD-ONCE");
+    SET_ENUM("PERIOD-DAY");
+    SET_ENUM("PERIOD-WEEK");
+    SET_ENUM("PERIOD-MONTH");
+    SET_ENUM("PERIOD-END-OF-MONTH");
+    SET_ENUM("PERIOD-NTH-WEEKDAY");
+    SET_ENUM("PERIOD-LAST-WEEKDAY");
+    SET_ENUM("PERIOD-YEAR");
+    SET_ENUM("NUM-PERIOD-TYPES");
+
+    SET_ENUM("WEEKEND-ADJ-INVALID");
+    SET_ENUM("WEEKEND-ADJ-NONE");
+    SET_ENUM("WEEKEND-ADJ-BACK");
+    SET_ENUM("WEEKEND-ADJ-FORWARD");
+    SET_ENUM("NUM-WEEKEND-ADJS");
 
 #undef SET_ENUM
   }
