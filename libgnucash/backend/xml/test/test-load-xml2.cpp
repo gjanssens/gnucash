@@ -44,6 +44,7 @@ extern "C"
 #include <cashobjects.h>
 #include <TransLog.h>
 #include <gnc-engine.h>
+#include <gnc-uri-utils.h>
 #include <gnc-prefs.h>
 
 #include <unittest-support.h>
@@ -152,8 +153,10 @@ main (int argc, char** argv)
                 gchar* to_open = g_build_filename (location, entry, (gchar*)NULL);
                 if (!g_file_test (to_open, G_FILE_TEST_IS_DIR))
                 {
-                    test_load_file (to_open);
+                    gchar *uri = gnc_uri_normalize_uri (to_open, FALSE);
+                    test_load_file (uri);
                     files_tested++;
+                    g_free (uri);
                 }
                 g_free (to_open);
             }
