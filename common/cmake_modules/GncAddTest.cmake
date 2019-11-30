@@ -95,6 +95,7 @@ function(gnc_add_test _TARGET _SOURCE_FILES TEST_INCLUDE_VAR_NAME TEST_LIBS_VAR_
   if (MINGW64)
       set(fpath "")
       file(TO_CMAKE_PATH "$ENV{PATH}" fpath)
+      make_unix_path(fpath)
       set(WIN_PATH "PATH=${BINDIR_BUILD};${fpath}")
       set_property(TEST ${_TARGET} APPEND PROPERTY ENVIRONMENT "${WINPATH}")
   endif()
@@ -117,6 +118,8 @@ function(gnc_add_scheme_test _TARGET _SOURCE_FILE)
     ${GUILE_EXECUTABLE} --debug -c "(load-from-path \"${_TARGET}\")(exit (run-test))"
   )
   get_guile_env()
+  set_property(TEST ${_TARGET} PROPERTY ENVIRONMENT "GNC_UNINSTALLED=YES")
+  set_property(TEST ${_TARGET} APPEND PROPERTY ENVIRONMENT "GNC_BUILDDIR=${CMAKE_BINARY_DIR}")
   set_tests_properties(${_TARGET} PROPERTIES ENVIRONMENT "${GUILE_ENV};${ARGN}")
 endfunction()
 
