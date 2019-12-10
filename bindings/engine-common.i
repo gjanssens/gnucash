@@ -38,6 +38,20 @@ static const GncGUID * gncAccountGetGUID(Account *x)
 
 %include <Split.h>
 
+%inline %{
+//typedef struct splitlist_s SplitListNode;
+typedef struct
+{
+    Split *split;
+    struct SplitListNode *next;
+    struct SplitListNode *prev;
+} SplitListNode;
+static SplitListNode *gnc_account_get_splits (const Account *account)
+{
+    return (SplitListNode*) xaccAccountGetSplitList (account);
+}
+%}
+
 %newobject gnc_account_get_children;
 AccountList * gnc_account_get_children (const Account *account);
 
