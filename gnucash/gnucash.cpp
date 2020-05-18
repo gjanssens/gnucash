@@ -157,7 +157,7 @@ static GOptionEntry options[] =
     },
     {
         "add-price-quotes", '\0', 0, G_OPTION_ARG_STRING, &add_quotes_file,
-        N_("Add price quotes to given GnuCash datafile"),
+        N_("Add price quotes to given GnuCash datafile. This option is deprecated and will be removed in gnucash 5.0. Please use 'gnucash-cli --add-price-quotes' instead"),
         /* Translators: Argument description for autohelp; see
            http://developer.gnome.org/doc/API/2.0/glib/glib-Commandline-option-parser.html */
         N_("FILE")
@@ -533,6 +533,8 @@ inner_main_add_price_quotes(void *closure, int argc, char **argv)
 {
     SCM mod, add_quotes, scm_book, scm_result = SCM_BOOL_F;
     QofSession *session = NULL;
+
+    g_print("%s",_("The '--add-price-quotes' option to gnucash has been deprecated and will be removed in GnuCash 5.0. Please use 'gnucash-cli --add-price-quotes' instead.\n"));
 
     scm_c_eval_string("(debug-set! stack 200000)");
 
