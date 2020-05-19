@@ -32,7 +32,7 @@ else()
 endif()
 
 set (gnucash_SOURCES
-  gnucash.c
+  gnucash.cpp
   gnucash-gresources.c
   ${GNUCASH_RESOURCE_FILE}
 )
