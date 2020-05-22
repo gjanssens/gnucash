@@ -58,6 +58,12 @@ extern "C" {
 #include <top-level.h>
 }
 
+#include <boost/locale.hpp>
+#include <iostream>
+#include <gnc-locale-utils.hpp>
+
+namespace bl = boost::locale;
+
 /* This static indicates the debugging module that this .o belongs to.  */
 static QofLogModule log_module = GNC_MOD_GUI;
 static gchar *userdata_migration_msg = NULL;
@@ -184,7 +190,8 @@ inner_main_add_price_quotes(void *data, [[maybe_unused]] int argc, [[maybe_unuse
     SCM mod, add_quotes, scm_book, scm_result = SCM_BOOL_F;
     QofSession *session = NULL;
 
-    g_print("%s",_("The '--add-price-quotes' option to gnucash has been deprecated and will be removed in GnuCash 5.0. Please use 'gnucash-cli --add-price-quotes' instead.\n"));
+    std::cerr << bl::translate ("The '--add-price-quotes' option to gnucash has been deprecated and will be removed in GnuCash 5.0. "
+                                "Please use 'gnucash-cli --add-price-quotes' instead.") << "\n";
 
     scm_c_eval_string("(debug-set! stack 200000)");
 
@@ -197,8 +204,8 @@ inner_main_add_price_quotes(void *data, [[maybe_unused]] int argc, [[maybe_unuse
 
     if (!gnc_quote_source_fq_installed())
     {
-        g_print("%s", _("No quotes retrieved. Finance::Quote isn't "
-                        "installed properly.\n"));
+        std::cerr << bl::translate ("No quotes retrieved. Finance::Quote isn't "
+                                    "installed properly.") << "\n";
         goto fail;
     }
 
@@ -300,7 +307,8 @@ inner_main (void *data, [[maybe_unused]] int argc, [[maybe_unused]] char **argv)
     gnc_hook_add_dangler(HOOK_UI_SHUTDOWN, (GFunc)gnc_file_quit, NULL, NULL);
 
     /* Install Price Quote Sources */
-    gnc_update_splash_screen(_("Checking Finance::Quote..."), GNC_SPLASH_PERCENTAGE_UNKNOWN);
+    auto msg = bl::translate ("Checking Finance::Quote...").str(gnc_get_locale());
+    gnc_update_splash_screen (msg.c_str(), GNC_SPLASH_PERCENTAGE_UNKNOWN);
     scm_c_use_module("gnucash price-quotes");
     scm_c_eval_string("(gnc:price-quotes-install-sources)");
 
@@ -308,7 +316,8 @@ inner_main (void *data, [[maybe_unused]] int argc, [[maybe_unused]] char **argv)
 
     if (!user_file_spec->nofile && (fn = get_file_to_load (user_file_spec->file_to_load)) && *fn )
     {
-        gnc_update_splash_screen(_("Loading data..."), GNC_SPLASH_PERCENTAGE_UNKNOWN);
+        auto msg = bl::translate ("Loading data...").str(gnc_get_locale());
+        gnc_update_splash_screen (msg.c_str(), GNC_SPLASH_PERCENTAGE_UNKNOWN);
         gnc_file_open_file(gnc_get_splash_screen(), fn, /*open_readonly*/ FALSE);
         g_free(fn);
     }
@@ -364,10 +373,10 @@ main(int argc, char ** argv)
     /* We need to initialize gtk before looking up all modules */
     if(!gtk_init_check (&argc, &argv))
     {
-        g_printerr(_("%s\nRun '%s --help' to see a full list of available command line options.\n"),
-                   _("Error: could not initialize graphical user interface and option add-price-quotes was not set.\n"
-                     "       Perhaps you need to set the $DISPLAY environment variable ?"),
-                   argv[0]);
+        std::cerr << bl::format (bl::translate ("Run '{1} --help' to see a full list of available command line options.")) % *argv[0]
+                  << "\n"
+                  << bl::translate ("Error: could not initialize graphical user interface and option add-price-quotes was not set.\n"
+                                    "       Perhaps you need to set the $DISPLAY environment variable ?");
         return 1;
     }
 
