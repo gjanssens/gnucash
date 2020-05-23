@@ -32,12 +32,12 @@ else()
 endif()
 
 set(gnucash_noinst_HEADERS
-    gnucash-base.hpp
+    gnucash-core-app.hpp
 )
 
 set (gnucash_SOURCES
   gnucash.cpp
-  gnucash-base.cpp
+  gnucash-core-app.cpp
   gnucash-gresources.c
   ${GNUCASH_RESOURCE_FILE}
 )
@@ -62,7 +62,7 @@ target_link_libraries (gnucash
 
 add_executable (gnucash-cli
     gnucash-cli.cpp
-    gnucash-base.cpp
+    gnucash-core-app.cpp
     ${GNUCASH_RESOURCE_FILE}
     ${gnucash_noinst_HEADERS}
 )
