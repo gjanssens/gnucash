@@ -632,10 +632,10 @@ Gnucash::Base::parse_command_line (int *argc, char ***argv)
     if (tmp_log_to_filename != NULL)
     {
 #ifdef __MINGW64__
-        char* log_to_filename = g_utf16_to_utf8(tmp_log_to_filename, -1, NULL, NULL, NULL);
+        log_to_filename = g_utf16_to_utf8(tmp_log_to_filename, -1, NULL, NULL, NULL);
         g_free (tmp_log_to_filename);
 #else
-        char* log_to_filename = tmp_log_to_filename;
+        log_to_filename = tmp_log_to_filename;
 #endif
     }
 
