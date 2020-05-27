@@ -498,7 +498,6 @@ redirect_stdout (void)
 
 Gnucash::CoreApp::CoreApp ()
 {
-    gchar *localedir;
     #if !defined(G_THREADS_ENABLED) || defined(G_THREADS_IMPL_NONE)
     #    error "No GLib thread implementation available!"
     #endif
@@ -534,7 +533,8 @@ Gnucash::CoreApp::CoreApp ()
         setlocale (LC_ALL, "C");
     }
     #endif
-    localedir = gnc_path_get_localedir();
+
+    auto localedir = gnc_path_get_localedir ();
     bindtextdomain(PROJECT_NAME, localedir);
     bindtextdomain("iso_4217", localedir); // For win32 to find currency name translations
     bind_textdomain_codeset("iso_4217", "UTF-8");
