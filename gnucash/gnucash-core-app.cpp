@@ -667,7 +667,7 @@ Gnucash::CoreApp::parse_command_line (int *argc, char ***argv)
         else
             std::cout << rel_fmt % gnc_version () << "\n";
 
-        std::cout << bl::translate ("Build ID") << gnc_build_id () << "\n";
+        std::cout << bl::translate ("Build ID") << " " << gnc_build_id () << "\n";
         exit(0);
     }
 
