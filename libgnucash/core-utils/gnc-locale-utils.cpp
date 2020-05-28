@@ -21,7 +21,9 @@
 \********************************************************************/
 extern "C"
 {
+#include <config.h>
 #include <glib.h>
+#include "gnc-path.h"
 }
 #include <clocale>
 #include <boost/locale.hpp>
@@ -53,7 +55,10 @@ gnc_get_locale()
 	tried_already = true;
 	try
 	{
-	    cached = std::locale("");
+            boost::locale::generator gen;
+            gen.add_messages_path(gnc_path_get_localedir());
+            gen.add_messages_domain(PROJECT_NAME);
+	    cached = std::locale();
 	}
 	catch (const std::runtime_error& err)
 	{
