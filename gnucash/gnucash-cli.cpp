@@ -56,6 +56,9 @@ namespace Gnucash {
         void configure_program_options (void);
 
         std::string m_quotes_file;
+        std::string run_report;
+        std::string export_type;
+        std::string output_file;
     };
 
 }
@@ -76,6 +79,15 @@ Gnucash::GnucashCli::parse_command_line (int argc, char **argv)
 
     if (m_opt_map.count ("add-price-quotes"))
         m_quotes_file = m_opt_map["add-price-quotes"].as<std::string>();
+
+    if (m_opt_map.count ("run-report"))
+        run_report = m_opt_map["run-report"].as<std::string>();
+
+    if (m_opt_map.count ("export-type"))
+        export_type = m_opt_map["export-type"].as<std::string>();
+
+    if (m_opt_map.count ("output-file"))
+        output_file = m_opt_map["output-file"].as<std::string>();
 }
 
 // Define command line options specific to gnucash-cli.
@@ -86,6 +98,12 @@ Gnucash::GnucashCli::configure_program_options (void)
     quotes_options.add_options()
     ("add-price-quotes", bpo::value<std::string>(),
      N_("Add price quotes to given GnuCash datafile.\n"))
+    ("run-report", bpo::value<std::string>(),
+     N_("Runs a report\n"))
+    ("export-type", bpo::value<std::string>(),
+     N_("Specify export type\n"))
+    ("output-file", bpo::value<std::string>(),
+     N_("Output file for report\n"))
     ("namespace", bpo::value<std::string>(),
      N_("Regular expression determining which namespace commodities will be retrieved"));
 
@@ -97,10 +115,17 @@ Gnucash::GnucashCli::start ([[maybe_unused]] int argc, [[maybe_unused]] char **a
 {
     Gnucash::CoreApp::start();
 
-    if (m_quotes_file.empty())
-        return 1;
+    if (!m_quotes_file.empty())
+        return Gnucash::add_quotes (m_quotes_file);
 
-    return Gnucash::add_quotes (m_quotes_file);
+    if (!run_report.empty())
+    {
+        auto datafile = Gnucash::CoreApp::get_file_to_load();
+        return Gnucash::run_report (datafile, run_report, export_type, output_file);
+    }
+
+    return 1;
+
 }
 
 int
