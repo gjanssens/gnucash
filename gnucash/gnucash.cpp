@@ -360,6 +360,11 @@ namespace Gnucash {
     {
     public:
         Gnucash (const char* app_name);
+        ~Gnucash()
+        {
+            std::cerr << "Gnucash destructor callled";
+        }
+
         void parse_command_line (int argc, char **argv);
 
         std::string get_quotes_file (void)
