@@ -360,7 +360,7 @@ namespace Gnucash {
     {
     public:
         Gnucash (const char* app_name);
-        void parse_command_line (int *argc, char ***argv);
+        void parse_command_line (int argc, char **argv);
 
         std::string get_quotes_file (void)
             { return m_quotes_file; }
@@ -380,7 +380,7 @@ Gnucash::Gnucash::Gnucash (const char *app_name) : Gnucash::CoreApp (app_name)
 
 
 void
-Gnucash::Gnucash::parse_command_line (int *argc, char ***argv)
+Gnucash::Gnucash::parse_command_line (int argc, char **argv)
 {
 
     // Pass remaining command line bits to our base class for further parsing
@@ -452,7 +452,7 @@ main(int argc, char ** argv)
         return 1;
     }
 
-    application.parse_command_line (&argc, &argv);
+    application.parse_command_line (argc, argv);
     application.start();
 
     /* If asked via a command line parameter, fetch quotes only */
