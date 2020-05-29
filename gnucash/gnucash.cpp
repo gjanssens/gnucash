@@ -387,10 +387,6 @@ Gnucash::Gnucash::Gnucash (const char *app_name) : Gnucash::CoreApp (app_name)
 void
 Gnucash::Gnucash::parse_command_line (int argc, char **argv)
 {
-
-    // Pass remaining command line bits to our base class for further parsing
-    // This will include a --help-gtk option to display gtk's option help
-    // extracted above
     Gnucash::CoreApp::parse_command_line (argc, argv);
 
     if (m_opt_map["help-gtk"].as<bool>())
