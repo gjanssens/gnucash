@@ -95,7 +95,7 @@ set (gnc_gnome_SOURCES
   dialog-order.c
   dialog-payment.c
   dialog-price-editor.c
-  dialog-price-edit-db.c
+  dialog-price-edit-db.cpp
   dialog-print-check.c
   dialog-progress.c
   dialog-report-column-view.c
