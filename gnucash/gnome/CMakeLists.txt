@@ -143,6 +143,7 @@ target_link_libraries(gnc-gnome
     gnc-register-gnome
     gnc-register-core
     gnc-gnome-utils
+    gnc-app-utils
     gnc-engine
     gnc-html
     gnc-locale-tax
@@ -157,6 +158,7 @@ target_compile_options(gnc-gnome PRIVATE -Wno-deprecated-declarations)
 target_include_directories(gnc-gnome
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
   PRIVATE
+    ${CMAKE_SOURCE_DIR}/libgnucash/app-utils
     ${CMAKE_SOURCE_DIR}/libgnucash/app-utils/calculation
     ${CMAKE_SOURCE_DIR}/gnucash/html
     ${CMAKE_BINARY_DIR}/gnucash/gnome-utils # for gnc-warnings.h
