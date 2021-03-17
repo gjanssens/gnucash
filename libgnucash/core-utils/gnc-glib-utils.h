@@ -179,17 +179,6 @@ void gnc_scm_log_debug(const gchar *msg);
 
 /** @} */
 
-/** @name glib Miscellaneous Functions
- @{
-*/
-
-/** Kill a process.  On UNIX send a SIGKILL, on Windows call TerminateProcess.
- *
- *  @param pid The process ID. */
-void gnc_gpid_kill(GPid pid);
-
-/** @} */
-
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

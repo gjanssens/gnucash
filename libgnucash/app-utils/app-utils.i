@@ -71,23 +71,6 @@ void gnc_option_db_set_option_selectable_by_name(SCM guile_option,
       const char *section, const char *name, gboolean selectable);
 
 #if defined(SWIGGUILE)
-%typemap(out) GncCommodityList * {
-  SCM list = SCM_EOL;
-  GList *node;
-
-  for (node = $1; node; node = node->next)
-    list = scm_cons(gnc_quoteinfo2scm(node->data), list);
-
-  $result = scm_reverse(list);
-}
-
-%inline %{
-typedef GList GncCommodityList;
-
-GncCommodityList *
-gnc_commodity_table_get_quotable_commodities(const gnc_commodity_table * table);
-%}
-
 gnc_commodity * gnc_default_currency (void);
 gnc_commodity * gnc_default_report_currency (void);
 

@@ -311,19 +311,3 @@ gnc_scm_log_debug(const gchar *msg)
     g_log("gnc.scm", G_LOG_LEVEL_DEBUG, "%s", msg);
 }
 
-void gnc_gpid_kill(GPid pid)
-{
-#ifdef G_OS_WIN32
-    if (!TerminateProcess((HANDLE) pid, 0))
-    {
-        gchar *msg = g_win32_error_message(GetLastError());
-        g_warning("Could not kill child process: %s", msg ? msg : "(null)");
-        g_free(msg);
-    }
-#else /* !G_OS_WIN32 */
-    if (kill(pid, SIGKILL))
-    {
-        g_warning("Could not kill child process: %s", g_strerror(errno));
-    }
-#endif /* G_OS_WIN32 */
-}

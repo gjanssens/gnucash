@@ -31,7 +31,6 @@
 #include "Account.h"
 #include "engine-helpers.h"
 #include "gnc-engine-guile.h"
-#include "glib-guile.h"
 #include "gnc-date.h"
 #include "gnc-engine.h"
 #include "gnc-session.h"
