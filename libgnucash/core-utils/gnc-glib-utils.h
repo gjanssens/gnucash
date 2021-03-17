@@ -169,16 +169,6 @@ void gnc_g_list_cut(GList **list, GList *cut_point);
 
 /** @} */
 
-/** @name Message Logging
- @{
-*/
-void gnc_scm_log_warn(const gchar *msg);
-void gnc_scm_log_error(const gchar *msg);
-void gnc_scm_log_msg(const gchar *msg);
-void gnc_scm_log_debug(const gchar *msg);
-
-/** @} */
-
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

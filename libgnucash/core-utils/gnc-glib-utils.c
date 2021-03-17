@@ -287,27 +287,3 @@ gnc_g_list_cut(GList **list, GList *cut_point)
     cut_point->prev = NULL;
 }
 
-void
-gnc_scm_log_warn(const gchar *msg)
-{
-    g_log("gnc.scm", G_LOG_LEVEL_WARNING, "%s", msg);
-}
-
-void
-gnc_scm_log_error(const gchar *msg)
-{
-    g_log("gnc.scm", G_LOG_LEVEL_CRITICAL, "%s", msg);
-}
-
-void
-gnc_scm_log_msg(const gchar *msg)
-{
-    g_log("gnc.scm", G_LOG_LEVEL_MESSAGE, "%s", msg);
-}
-
-void
-gnc_scm_log_debug(const gchar *msg)
-{
-    g_log("gnc.scm", G_LOG_LEVEL_DEBUG, "%s", msg);
-}
-
