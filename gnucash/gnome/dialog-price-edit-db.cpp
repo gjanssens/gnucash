@@ -547,7 +547,7 @@ gnc_prices_dialog_get_quotes_clicked (GtkWidget *widget, gpointer data)
     auto pdb_dialog = static_cast<PricesDialog *> (data);
 
     ENTER(" ");
-    GncQuotes quotes (pdb_dialog->book);
+    GncQuotes quotes;
     if (quotes.cmd_result() != 0)
     {
         if (!quotes.error_msg().empty())
@@ -557,7 +557,7 @@ gnc_prices_dialog_get_quotes_clicked (GtkWidget *widget, gpointer data)
     }
 
     gnc_set_busy_cursor (NULL, TRUE);
-    quotes.fetch();
+    quotes.fetch (pdb_dialog->book);
     gnc_unset_busy_cursor (NULL);
 
     /* Without this, the summary bar on the accounts tab
