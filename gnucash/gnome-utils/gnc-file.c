@@ -1472,6 +1472,7 @@ gnc_file_save (GtkWindow *parent)
 
     xaccReopenLog();
     gnc_add_history (session);
+    gnc_state_save (session);
     gnc_hook_run(HOOK_BOOK_SAVED, session);
     LEAVE (" ");
 }
@@ -1721,6 +1722,7 @@ gnc_file_do_save_as (GtkWindow *parent, const char* filename)
 
         xaccReopenLog();
         gnc_add_history (new_session);
+        gnc_state_save (new_session);
         gnc_hook_run(HOOK_BOOK_SAVED, new_session);
     }
     /* --------------- END CORE SESSION CODE -------------- */
