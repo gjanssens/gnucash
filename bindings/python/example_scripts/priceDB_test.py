@@ -16,7 +16,7 @@
 #   @author Mike Evans 
 #   @ingroup python_bindings_examples
 
-from gnucash import Session
+from gnucash import (Session, SessionOpenMode)
 
 # FILE should be the path to your existing gnucash file/database
 # For a file, simply pass the pathname, for a database you can use
@@ -25,28 +25,34 @@ from gnucash import Session
 # postgres://user:password@host[:port]/dbname (the port is optional)
 #
 FILE = "PATH_TO_YOUR_TEST_FILE"  ## Fail is not saved but use a copy anyway
+CURRENCY = "CURRENCY"            #  Replace with your price currency (eg EUR, USD,...)
+NAMESPACE = "NASDAQ"             #  Replace with namespace of your commodity
+STOCK = "SOME_STOCK"             #  Replace with name of your stock
 
-session = Session(FILE, True, False, False)
+session = Session(FILE, mode = SessionOpenMode.SESSION_READ_ONLY)
 
 root = session.book.get_root_account()
 book = session.book
 pdb = book.get_price_db()
 comm_table = book.get_table()
-gbp = comm_table.lookup("CURRENCY", "SOME_CURRENCY")
-arm = comm_table.lookup("NASDAQ", "SOME_STOCK")
+gbp = comm_table.lookup("CURRENCY", CURRENCY)
+arm = comm_table.lookup(NAMESPACE, STOCK)
 latest = pdb.lookup_latest(arm,gbp) # from the table, NOT live data
-value = latest.get_value()
-pl = pdb.get_prices(arm,gbp)
-for pr in pl:
-   source = pr.get_source()
-   time = pr.get_time64()
-   v=pr.get_value()
-   price = float(v.num)/v.denom
-   print(time, source, price)
+if latest is not None:
+    value = latest.get_value()
+    pl = pdb.get_prices(arm,gbp)
+    for pr in pl:
+       source = pr.get_source()
+       time = pr.get_time64()
+       v=pr.get_value()
+       price = float(v.num)/v.denom
+       print(time, source, price)
 
-if len(pl) > 0:
-   v0 = pl[0].get_value()
-   print(arm.get_fullname(), float(v0.num) / float(v0.denom ))
+    if len(pl) > 0:
+       v0 = pl[0].get_value()
+       print(arm.get_fullname(), float(v0.num) / float(v0.denom ))
+else:
+    print ("No {} price found for '{}':'{}'.".format(CURRENCY, NAMESPACE, STOCK))
 
 session.end()
 session.destroy()
