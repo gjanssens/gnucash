@@ -108,7 +108,7 @@ def next_period_start(start_year, start_month, period_type):
     #
     # A the super nice thing is that you can add all kinds of period lengths
     # to PERIODS
-    end_year = start_year + ( (end_month-1) / NUM_MONTHS )
+    end_year = int( start_year + ( (end_month-1) / NUM_MONTHS ) )
     end_month = ( (end_month-1) % NUM_MONTHS ) + 1
 
     return end_year, end_month
@@ -196,7 +196,7 @@ def main():
         # insert and add all splits in the periods of interest
         for split in account_of_interest.GetSplitList():
             trans = split.parent
-            trans_date = date.fromtimestamp(trans.GetDate())
+            trans_date = trans.GetDate().date()
 
             # use binary search to find the period that starts before or on
             # the transaction date
