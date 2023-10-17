@@ -64,7 +64,8 @@ def deprecated_args_session(ignore_lock_or_mode=None, is_new=None,
         # if not provided calculate mode from deprecated args
         if mode is None:
             from gnucash.gnucash_core import SessionOpenMode
-            ignore_lock = False if ignore_lock is None else ignore_lock
+            if ignore_lock is None:
+                ignore_lock = False if ignore_lock_or_mode is None else ignore_lock_or_mode
             is_new = False if is_new is None else is_new
             force_new = False if force_new is None else force_new
             mode = SessionOpenMode((ignore_lock << 2) + (is_new << 1) + force_new)
