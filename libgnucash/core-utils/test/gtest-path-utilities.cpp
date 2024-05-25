@@ -113,7 +113,7 @@ TEST_F(PathTest, gnc_path_get_datadir)
 TEST_F(PathTest, gnc_path_get_sysconfdir)
 {
     gchar *dirname = gnc_file_path_relative_part(PREFIX, SYSCONFDIR);
-    gchar *sysconfpath = g_build_filename(m_prefix, dirname, PROJECT_NAME, NULL);
+    gchar *sysconfpath = g_build_filename(m_prefix, dirname, "/" PROJECT_NAME, NULL);
     g_free(dirname);
 #ifdef ENABLE_BINRELOC
     EXPECT_STREQ_GFREE(gnc_path_get_pkgsysconfdir(), sysconfpath);
@@ -125,7 +125,7 @@ TEST_F(PathTest, gnc_path_get_sysconfdir)
     g_free(sysconfpath);
     g_unsetenv("GNC_UNINSTALLED");
     g_unsetenv("GNC_BUILDDIR");
-    sysconfpath = g_build_filename(SYSCONFDIR, PROJECT_NAME, NULL);
+    sysconfpath = g_build_filename(SYSCONFDIR, "/" PROJECT_NAME, NULL);
     EXPECT_STREQ_GFREE(gnc_path_get_pkgsysconfdir(), sysconfpath);
     g_free(sysconfpath);
 #endif
