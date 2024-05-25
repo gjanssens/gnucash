@@ -84,7 +84,7 @@ static QofLogModule log_module = "gnc.translog";
 /* ------------------------------------------------------------------ */
 
 
-static int gen_logs = 1;
+static int gen_logs = 0;
 static FILE * trans_log = nullptr; /**< current log file handle */
 static char * trans_log_name = nullptr; /**< current log file name */
 static char * log_base_name = nullptr;
@@ -99,10 +99,6 @@ void xaccLogDisable (void)
 void xaccLogEnable  (void)
 {
     gen_logs = 1;
-}
-gboolean xaccLogIsEnabled  (void)
-{
-    return (gen_logs == 1);
 }
 
 /********************************************************************\

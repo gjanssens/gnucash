@@ -62,12 +62,8 @@ void gnc_clear_current_session()
 {
     if (current_session)
     {
-        gboolean save_log_state = xaccLogIsEnabled();
-        if (save_log_state)
-            xaccLogDisable();
+        xaccLogDisable();
         qof_session_destroy(current_session);
-        if (save_log_state)
-            xaccLogEnable();
         current_session = NULL;
     }
 }
