@@ -40,6 +40,7 @@ from gnucash.gnucash_core_c import \
 from sys import argv
 from os.path import abspath
 from datetime import date
+from urllib.parse import urlparse
 
 # This script takes a gnucash url
 # and creates a new file/db at a second url that has the same
@@ -308,7 +309,9 @@ def main():
         commodtable = new_book.get_table()
         # we discovered that if we didn't have this save early on, there would
         # be trouble later
-        new_book_session.save()
+        scheme = urlparse(argv[2]).scheme
+        if (scheme == 'xml'):
+            new_book_session.save()
 
         opening_balance_per_currency = {}
         recursivly_build_account_tree(
