@@ -252,8 +252,21 @@ static void test_filter_locales ()
 {
     std::vector<std::string> dates;
 
-    for (auto i = 0; i < 500; ++i)
-        dates.push_back ("09/22/2021");
+//    for (auto i = 0; i < 500; ++i)
+//        dates.push_back ("08 Sep 2021");
+
+    dates.push_back ("08 Jan 2021");
+    dates.push_back ("08 Feb 2021");
+    dates.push_back ("08 Mar 2021");
+    dates.push_back ("08 Apr 2021");
+    dates.push_back ("08 May 2021");
+    dates.push_back ("08 Jun 2021");
+    dates.push_back ("08 Jul 2021");
+    dates.push_back ("08 Aug 2021");
+    dates.push_back ("08 Sep 2021");
+    dates.push_back ("08 Oct 2021");
+    dates.push_back ("08 Nov 2021");
+    dates.push_back ("08 Dec 2021");
 
     auto locales = gnc_get_available_locales ();
     std::cout << locales.size() << " locales available. Testing "

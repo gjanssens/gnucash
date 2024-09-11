@@ -555,10 +555,22 @@ locale_to_formatter_and_calendar (const std::string locale_str)
         std::shared_ptr<icu::DateFormat> formatter_short (icu::DateFormat::createDateInstance(icu::DateFormat::kShort, locale));
         if (formatter_short == nullptr)
             throw std::invalid_argument ("Cannot parse string");
-        formatter_short->setLenient (false);
+        formatter_short->setCalendarLenient (false);
+
+        // icu_73::UnicodeString dateuni;
+        // dateuni = formatter_short->format (0.0, dateuni);
+        // std::string dateutf8;
+        // dateutf8 = dateuni.toUTF8String(dateutf8);
+        // std::cout << locale_str << " short format " << ": " << dateutf8 << std::endl;
 
         std::shared_ptr<icu::DateFormat> formatter_med (icu::DateFormat::createDateInstance(icu::DateFormat::kMedium, locale));
-        formatter_med->setLenient (false);
+        formatter_med->setCalendarLenient (false);
+
+        // dateuni.remove();
+        // dateuni = formatter_med->format (0.0, dateuni);
+        // dateutf8.clear();
+        // dateutf8 = dateuni.toUTF8String(dateutf8);
+        // std::cout << locale_str << " medium format " << ": " << dateutf8 << std::endl;
 
         UErrorCode status = U_ZERO_ERROR;
         std::shared_ptr<icu::Calendar> calendar(icu::Calendar::createInstance(locale, status));
@@ -578,7 +590,6 @@ GncDateImpl::GncDateImpl(const std::string str, const std::string locale_str) :
     /* Temporarily initialized to today, will be used and adjusted in the code below */
     m_greg(boost::gregorian::day_clock::local_day())
 {
-    // std::cout << locale_str << '|' << str << ": ";
 
     auto [formatter_short, formatter_med, calendar] = locale_to_formatter_and_calendar (locale_str);
     icu::UnicodeString input = icu::UnicodeString::fromUTF8(str);
@@ -587,24 +598,31 @@ GncDateImpl::GncDateImpl(const std::string str, const std::string locale_str) :
     UDate date = formatter_short->parse(input, parsePos); // 1st attempt
 
     if (parsePos.getErrorIndex() != -1)
+    {
+        //std::cout << locale_str << ": failed parsing with short formatter, attempting medium parser" << std::endl;
+        parsePos = icu::ParsePosition();
         date = formatter_med->parse(input, parsePos); // 2nd attempt
+    }
+    //else
+        //std::cout << locale_str << ": successfully parsed with short formatter" << std::endl;
 
     if (parsePos.getErrorIndex() != -1)
-        throw std::invalid_argument ("Cannot parse string");
+        throw std::invalid_argument ("Cannot parse string, parsePos = " + std::to_string(parsePos.getErrorIndex()));
 
     UErrorCode status = U_ZERO_ERROR;
     calendar->setTime(date, status);
     if (U_FAILURE(status))
-        throw std::invalid_argument ("Cannot parse string");
+        throw std::invalid_argument ("Failed to set time");
 
     int32_t day = calendar->get(UCAL_DATE, status);
     int32_t month = calendar->get(UCAL_MONTH, status) + 1;
     int32_t year = calendar->get(UCAL_YEAR, status);
 
     if (U_FAILURE(status))
-        throw std::invalid_argument ("Cannot parse string");
+        throw std::invalid_argument ("Failed to extract day, month, year");
 
-    // std::cout << day << '/' << month << '/' << year << std::endl;
+    // std::cout << locale_str << '|' << str << ": ";
+    // std::cout << "day: " << day << ", month: " << month << ", year: " << year << std::endl;
     m_greg = Date(year, month, day);
 }
 

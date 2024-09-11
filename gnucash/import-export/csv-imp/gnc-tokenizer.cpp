@@ -142,7 +142,13 @@ gnc_filter_locales (StrVec& candidate_locales, const StrVec dates)
         new_candidate_locales.clear ();
         for (const auto& locale : candidate_locales)
             try { GncDate (date, locale); new_candidate_locales.push_back (locale); }
-            catch (const std::exception&) {};
+            catch (const std::exception& ex) {
+                //std::cout << locale << ": " << ex.what() << '\n';
+            };
+        std::cout << date << " - available locales: ";
+        for (auto locale : new_candidate_locales)
+            std::cout << ' ' << locale;
+        std::cout << '\n';
 
         std::swap (candidate_locales, new_candidate_locales);
     }
